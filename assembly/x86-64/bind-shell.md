@@ -30,7 +30,7 @@ In this case, address family `AF_INET` uses IPv4 protocol implementation. And si
 
 
 Assembly code:
-``` Assembly x64
+``` 
 	global _start
 	
 	section .text
@@ -92,7 +92,7 @@ Its purpose is to cast the structure pointer passed in `addr` to avoid compiler 
 
 
 Assembly code:
-```Assembly x64
+```
 	; Bind syscall
 		; The number of 'bind' syscall equals to 49 in decimal
 		; Before assigning anything to rax, save its value to rdi
@@ -148,7 +148,7 @@ int listen(int sockfd, int backlog);
 1. We already know what `sockfd` argument is.
 2. `backlog` defines the max length for the queue of socket pending connections.
 
-```Assembly x64
+```
 	; Listen syscall
 	
 		push 50 
@@ -177,7 +177,7 @@ int accept (int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 2. `addr` - a pointer to sockaddr sructure (in our case it is rsi).
 3. `addrlen` - value-result argument that contains the size of the struct pointed to by `addr` (in bytes).
 
-```Assembly x64
+```
 	; Accept syscall
 	
 		push 43
@@ -204,7 +204,7 @@ int accept (int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 int close(int fd);
 ```
 
-```Assembly x64
+```
 	closefd_syscall:
 		
 		push 3
@@ -242,7 +242,7 @@ The `closefd_syscall:` is not a comment, but a point to which the program can re
 ssize_t read(int fd, void *buf, size_t count);
 ```
 
-```Assembly x64
+```
 	read_syscall:
 	
 		xor rax, rax
@@ -266,7 +266,7 @@ ssize_t read(int fd, void *buf, size_t count);
 Here we just add some authentication not in the most reliable way, but just to see a concept.
 Do not forget to hexify your password.
 
-```Assembly x64
+```
 	; Compare password
 	
 		; 'urmom\n' = 0x75726D6F6D5C6E
@@ -290,7 +290,7 @@ int dup2(int oldfd, int newfd);
 
 
 Assembly code:
-```Assembly x64
+```
 	; Duplicate2 syscall
 	
 		; rdi client socket
@@ -326,7 +326,7 @@ Assembly code:
 int execve(const char *pathname, char *const _Nullable argv[], char *const _Nullable envp[]);
 ```
 
-```Assembly x64
+```
 	; Execve syscall
 	
 		mov rax, 59
