@@ -2,7 +2,7 @@
 title: Bind Shell in x64
 ---
 
-Since I never read any notes I make (and there are tons of them), the desicion to create this tutorial was made. I am just a student, so do not look at this tutorial as an undeniable truth and a complete guide to the topic. No no no, there is an awful amount of stuff to learn on your own in order to grasp what's happening, AND since this is my 3rd program written in assembly ever, some mistakes may occur. My previous two programs were 'Hello world' and 2 number addition. Furthermore, English is not my first or second language, nor is it a third one, and I refuse to use translator or - GOD FORBID - ai.
+Since I never read any notes I make (and there are tons of them), the desicion to create this tutorial was made. I am just a student, so please do not take this tutorial as the ultimate truth and comprehensive guide on the subject. No no no, there is an awful amount of stuff to learn on your own in order to grasp what's happening, AND since this is my 3rd ever written program in assembly, some mistakes may occurre. My previous two programs were 'Hello world' and adding 2 numbers. Furthermore, English is neither my first nor second language, nor is it a third one, and I refuse to use translator or - GOD FORBID - ai.
 
 
 ### Creating a socket
@@ -355,7 +355,7 @@ Run those 2 commands:
 1. `nasm -f elf64 -bindshell.o bindshell.s`
 2. `ld -o bindshell bindshell.o`
 
-Now we have our program called 'bindshell'. Run in in your terminal, then open another tab and try to connect to it using netcat command:
-`nc 127.0.0.1 4444`, and right after it input the password you set. Now to check if it works, run some commands like `id` or `whoami` or `echo "dick"`.
+Now we have our program called 'bindshell'. Run it in your terminal, then open another tab and try to connect to it using netcat command:
+`nc 127.0.0.1 4444`, and right after it input the password you've set. Now to check if it works, run some commands like `id` or `whoami` or `echo "dick"`.
 
 I know, some stuff may be frustrating. It gets worse with time, get used to it :3 
